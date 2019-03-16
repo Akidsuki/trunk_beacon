@@ -30,16 +30,12 @@ class App < Sinatra::Base
         follow_event(event)
       when Line::Bot::Event::Message
         case event.type
-        when Line::Bot::Event::MessageType::Text
+        when Line::Bot::Event::MessageType::Image
           message = {
             type: 'text',
-            text: event.message['text']
+            text: 'hogehoge'
           }
           client.reply_message(event['replyToken'], message)
-        when Line::Bot::Event::MessageType::Image, Line::Bot::Event::MessageType::Video
-          response = client.get_message_content(event.message['id'])
-          tf = Tempfile.open("content")
-          tf.write(response.body)
         end
       end
     }
@@ -60,8 +56,10 @@ class App < Sinatra::Base
   end
 
   def create_user(line_id)
-    statement = db.prepare('INSERT INTO users (line_id, created_at) VALUES(?, NOW())')
-    statement.execute(line_id)
+    res = client.get_profile(line_id)
+    nickname = res.body['displayName']
+    statement = db.prepare('INSERT INTO Users (LINEID, nickname, created_at) VALUES(?, ? ,NOW())')
+    statement.execute(line_id, nickname)
     statement.close
   end
 
