@@ -5,7 +5,7 @@ require 'line/bot'
 class App < Sinatra::Base
   def client
     @client ||= Line::Bot::Client.new { |config|
-      # 環境変数化する
+      # TODO 環境変数化する
       config.channel_secret = "7251b6d94ddd87db824fc02275042c12"
       config.channel_token = "t3pWIjQC1Hj3u6IFxIW0ocUHmoUafFP9hGUYP0ksNBQPW4zrnkccjCb95+CYiicD7ZUjjsovWoi0KbLt/aZ8JeqvlbKMGbN2auCZJ2JnVvL7QowXCMcWuGT3uUknz0vTVG+5Br0KR7Kq5AD22l0nrQdB04t89/1O/w1cDnyilFU="
     }
