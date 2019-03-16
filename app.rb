@@ -54,13 +54,16 @@ class App < Sinatra::Base
 
           line_id = event['source']['userId']
           image_name = "#{event.message['id']}.jpg"
+          statement = db.prepare("select beacon_id from Targets where LINEID = ? order by created_at desc")
+          row = statement.execute(line_id).first
+          beacon_id = row['beacon_id']
 
           create_tero(line_id, image_name)
 
           hour_ago = 10.hours.ago
 
-          statement = db.prepare("select distinct beacon_id, LINEID from Targets where created_at > ? and not LINEID = ?")
-          row = statement.execute(hour_ago, line_id).to_a
+          statement = db.prepare("select distinct beacon_id, LINEID from Targets where created_at > ? and not LINEID = ? and beacon_id = ?")
+          row = statement.execute(hour_ago, line_id, beacon_id).to_a
           row.each do |r|
             message = {
               type: 'image',
