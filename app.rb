@@ -138,9 +138,11 @@ class App < Sinatra::Base
   end
 
   def post_back_event(event)
-    res = Net::HTTP.start("https://trunk-hackathon.herokuapp.com") do |http|
-      http.get "/insert_feedback.php?#{event['postback']['data']}"
-    end
+    uri = "https://trunk-hackathon.herokuapp.com/insert_feedback.php?#{event['postback']['data']}"
+    res = Net::HTTP.get_response(URI.parse(uri))
+
+    p res.code
+    p res.body
   end
 
   def create_user(line_id)
