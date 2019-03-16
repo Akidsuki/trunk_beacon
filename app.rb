@@ -15,6 +15,12 @@ class App < Sinatra::Base
     "サーバー動いてるお！"
   end
 
+  get '/static/:filename' do
+    image = File.open("./static/#{params[:filename]}", 'rb')
+    content_type 'img/jpg'
+    image
+  end
+
   post '/callback' do
     body = request.body.read
 
