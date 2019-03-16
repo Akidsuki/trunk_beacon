@@ -50,7 +50,6 @@ class App < Sinatra::Base
 
           create_tero(line_id, image_name)
 
-          # TODO 該当するユーザーにテロする
           statement = db.prepare('SELECT id FROM Users WHERE LINEID = ? limit 1')
           row = statement.execute(line_id).first
           statement.close
