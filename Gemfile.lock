@@ -3,6 +3,7 @@ GEM
   specs:
     line-bot-api (1.7.0)
     mustermann (1.0.3)
+    mysql2 (0.5.2)
     rack (2.0.6)
     rack-protection (2.0.5)
       rack
@@ -18,6 +19,7 @@ PLATFORMS
 
 DEPENDENCIES
   line-bot-api
+  mysql2
   sinatra
 
 BUNDLED WITH
