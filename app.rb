@@ -1,9 +1,9 @@
 require 'sinatra'
 require 'mysql2'
 require 'line/bot'
-require "redis"
 require 'json'
 require 'pry'
+require 'active_support/all'
 
 
 class App < Sinatra::Base
@@ -33,7 +33,6 @@ class App < Sinatra::Base
       error 400 do 'Bad Request' end
     end
 
-    redis
     events = client.parse_events_from(body)
     events.each { |event|
       case event
