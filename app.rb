@@ -59,7 +59,8 @@ class App < Sinatra::Base
           beacon_id = row['beacon_id']
 
           create_tero(line_id, image_name)
-
+          # タイムゾーンの関係で１０時間戻す
+          # 本当は一時間で良い
           hour_ago = 10.hours.ago
 
           statement = db.prepare("select distinct beacon_id, LINEID from Targets where created_at > ? and not LINEID = ? and beacon_id = ?")
