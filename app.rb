@@ -78,11 +78,8 @@ class App < Sinatra::Base
   end
 
   def create_user(line_id)
-    res = client.get_profile(line_id)
-    body = JSON.parse(res.body)
-    nickname = body['displayName']
-    statement = db.prepare('INSERT INTO Users (LINEID, nickname, created_at) VALUES(?, ? ,NOW())')
-    statement.execute(line_id, nickname)
+    statement = db.prepare('INSERT INTO Users (LINEID, created_at) VALUES(?, NOW())')
+    statement.execute(line_id)
     statement.close
   end
 
