@@ -1,4 +1,5 @@
 require 'sinatra'
+require 'sinatra/cross_origin'
 require 'mysql2'
 require 'line/bot'
 require 'json'
@@ -9,6 +10,12 @@ require "net/http"
 $BASE_URL = 'https://f25c46ee.ngrok.io/'
 
 class App < Sinatra::Base
+  configure do
+    enable :cross_origin
+  end
+  before do
+    response.headers['Access-Control-Allow-Origin'] = '*'
+  end
   def client
     @client ||= Line::Bot::Client.new { |config|
       # TODO 環境変数化する
