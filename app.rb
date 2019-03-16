@@ -1,6 +1,10 @@
 require 'sinatra'
 require 'mysql2'
 require 'line/bot'
+require "redis"
+require 'json'
+require 'pry'
+
 
 class App < Sinatra::Base
   def client
@@ -29,6 +33,7 @@ class App < Sinatra::Base
       error 400 do 'Bad Request' end
     end
 
+    redis
     events = client.parse_events_from(body)
     events.each { |event|
       case event
@@ -75,7 +80,8 @@ class App < Sinatra::Base
 
   def create_user(line_id)
     res = client.get_profile(line_id)
-    nickname = res.body['displayName']
+    body = JSON.parse(res.body)
+    nickname = body['displayName']
     statement = db.prepare('INSERT INTO Users (LINEID, nickname, created_at) VALUES(?, ? ,NOW())')
     statement.execute(line_id, nickname)
     statement.close
@@ -100,5 +106,12 @@ class App < Sinatra::Base
     )
 
     @db_client
+  end
+
+  def redis
+    return @redis_client if @redis_client
+    @redis_client = Redis.new(host: "133.130.111.100", port: 6379, password: 'nwE9sH3tt')
+
+    @redis_client
   end
 end
