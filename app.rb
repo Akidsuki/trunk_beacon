@@ -56,20 +56,40 @@ class App < Sinatra::Base
           image_name = "#{event.message['id']}.jpg"
           statement = db.prepare("select beacon_id from Targets where LINEID = ? order by created_at desc")
           row = statement.execute(line_id).first
+          return if row.nil?
+          p row
           beacon_id = row['beacon_id']
+          p beacon_id
 
           create_tero(line_id, image_name)
           # タイムゾーンの関係で１０時間戻す
           # 本当は一時間で良い
           hour_ago = 10.hours.ago
 
-          statement = db.prepare("select distinct beacon_id, LINEID from Targets where created_at > ? and not LINEID = ? and beacon_id = ?")
-          row = statement.execute(hour_ago, line_id, beacon_id).to_a
+          statement = db.prepare("select distinct beacon_id, LINEID from Targets where created_at > ? and beacon_id = ?")
+          # statement = db.prepare("select distinct beacon_id, LINEID from Targets where created_at > ? and not LINEID = ? and beacon_id = ?")
+          row = statement.execute(hour_ago, beacon_id).to_a
+          # row = statement.execute(hour_ago, line_id, beacon_id).to_a
+          return if row.nil?
           row.each do |r|
+            p r
+            # message = {
+            #   type: 'image',
+            #   originalContentUrl: "https://0b7b0a03.ngrok.io/static/#{image_name}",
+            #   previewImageUrl: "https://0b7b0a03.ngrok.io/static/#{image_name}"
+            # }
             message = {
-              type: 'image',
-              originalContentUrl: "https://0b7b0a03.ngrok.io/static/#{image_name}",
-              previewImageUrl: "https://0b7b0a03.ngrok.io/static/#{image_name}"
+              type: 'template',
+              altText: 'Buttons alt text',
+              template: {
+                type: 'buttons',
+                thumbnailImageUrl: "https://0b7b0a03.ngrok.io/static/#{image_name}",
+                title: '飯テロ',
+                text: 'Hello, fu◯k you gay',
+                actions: [
+                  { label: 'もっとよこせ！', type: 'postback', data: "#{}" },
+                ]
+              }
             }
 
             client.push_message(r['LINEID'], message)
