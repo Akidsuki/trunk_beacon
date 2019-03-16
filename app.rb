@@ -6,6 +6,8 @@ require 'pry'
 require 'active_support/all'
 require "net/http"
 
+$BASE_URL = 'https://0b7b0a03.ngrok.io'
+
 class App < Sinatra::Base
   def client
     @client ||= Line::Bot::Client.new { |config|
@@ -69,6 +71,7 @@ class App < Sinatra::Base
           # 本当は一時間で良い
           hour_ago = 10.hours.ago
 
+          # TODO 検証が済んだら戻す
           statement = db.prepare("select distinct beacon_id, LINEID from Targets where created_at > ? and beacon_id = ?")
           # statement = db.prepare("select distinct beacon_id, LINEID from Targets where created_at > ? and not LINEID = ? and beacon_id = ?")
           row = statement.execute(hour_ago, beacon_id).to_a
@@ -76,7 +79,6 @@ class App < Sinatra::Base
           row.each do |r|
             statement = db.prepare('SELECT id FROM Users WHERE LINEID = ?')
             rr = statement.execute(r['LINEID']).first
-            binding.pry
             user_id = rr['id']
 
             message = {
@@ -84,7 +86,7 @@ class App < Sinatra::Base
               altText: 'Buttons alt text',
               template: {
                 type: 'buttons',
-                thumbnailImageUrl: "https://0b7b0a03.ngrok.io/static/#{image_name}",
+                thumbnailImageUrl: "#{$BASE_URL}/static/#{image_name}",
                 title: '飯テロ',
                 text: 'Hello, fu◯k you gay',
                 actions: [
@@ -125,7 +127,6 @@ class App < Sinatra::Base
   end
 
   def post_back_event(event)
-    binding.pry
     res = Net::HTTP.start("https://trunk-hackathon.herokuapp.com") do |http|
       http.get "/insert_feedback.php?#{event['postback']['data']}"
     end
