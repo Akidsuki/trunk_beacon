@@ -51,6 +51,20 @@ class App < Sinatra::Base
           create_tero(line_id, image_name)
 
           # TODO 該当するユーザーにテロする
+          statement = db.prepare('SELECT id FROM Users WHERE LINEID = ? limit 1')
+          row = statement.execute(line_id).first
+          statement.close
+
+          hour_ago = 1.hour.ago
+
+          statement = db.prepare("select distinct beacon_id user_id from Targets where created_at > ? and not user_id = ?")
+          row = statement.execute(hour_ago, row['id']).to_a
+          # TODO 該当するユーザーにテロする
+          # row.each do |r|
+          # end
+
+          statement.close
+          binding.pry
 
           message = {
             type: "text",
