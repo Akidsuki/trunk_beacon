@@ -1,4 +1,5 @@
 require 'sinatra'
+require 'mysql2'
 require 'line/bot'
 
 class App < Sinatra::Base
@@ -41,5 +42,19 @@ class App < Sinatra::Base
     }
 
     "OK"
+  end
+
+  def db
+    return @db_client if @db_client
+
+    @db_client = Mysql2::Client.new(
+      host: 'public.2it8h.tyo1.database-hosting.conoha.io',
+      port: 3306,
+      username: '2it8h_developer',
+      password: 'Line123456789',
+      database: '2it8h_development',
+    )
+
+    @db_client
   end
 end
