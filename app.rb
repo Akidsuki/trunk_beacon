@@ -26,6 +26,8 @@ class App < Sinatra::Base
     events = client.parse_events_from(body)
     events.each { |event|
       case event
+      when Line::Bot::Event::Follow
+        follow_event(event)
       when Line::Bot::Event::Message
         case event.type
         when Line::Bot::Event::MessageType::Text
@@ -43,6 +45,24 @@ class App < Sinatra::Base
     }
 
     "OK"
+  end
+
+  def follow_event(event)
+    line_id = event['source']['userId']
+    create_user(line_id)
+
+    message = {
+      type: "text",
+      text: "友達登録ありがとう!!\nよろぴく！"
+    }
+
+    client.push_message(line_id, message)
+  end
+
+  def create_user(line_id)
+    statement = db.prepare('INSERT INTO users (line_id, created_at) VALUES(?, NOW())')
+    statement.execute(line_id)
+    statement.close
   end
 
   def db
