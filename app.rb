@@ -37,10 +37,22 @@ class App < Sinatra::Base
       when Line::Bot::Event::Message
         case event.type
         when Line::Bot::Event::MessageType::Image
+          content = client.get_message_content(event.message['id'])
+          tf = File.open("./static/#{event.message['id']}.jpg", 'wb')
+          tf.write(content.body)
+
+          line_id = event['source']['userId']
+          image_name = "#{event.message['id']}.jpg"
+
+          create_tero(line_id, image_name)
+
+          # TODO 該当するユーザーにテロする
+
           message = {
-            type: 'text',
-            text: 'hogehoge'
+            type: "text",
+            text: "飯テロしたったで!!\nお主も悪よのう"
           }
+
           client.reply_message(event['replyToken'], message)
         end
       end
@@ -66,6 +78,12 @@ class App < Sinatra::Base
     nickname = res.body['displayName']
     statement = db.prepare('INSERT INTO Users (LINEID, nickname, created_at) VALUES(?, ? ,NOW())')
     statement.execute(line_id, nickname)
+    statement.close
+  end
+
+  def create_tero(line_id, image_name)
+    statement = db.prepare('INSERT INTO Teros (user_id, img_name, created_at) VALUES(?, ? ,NOW())')
+    statement.execute(line_id, image_name)
     statement.close
   end
 
