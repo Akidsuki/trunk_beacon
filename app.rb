@@ -50,17 +50,19 @@ class App < Sinatra::Base
 
           create_tero(line_id, image_name)
 
-          statement = db.prepare('SELECT id FROM Users WHERE LINEID = ? limit 1')
-          row = statement.execute(line_id).first
-          statement.close
-
           hour_ago = 1.hour.ago
 
-          statement = db.prepare("select distinct beacon_id user_id from Targets where created_at > ? and not user_id = ?")
-          row = statement.execute(hour_ago, row['id']).to_a
-          # TODO 該当するユーザーにテロする
-          # row.each do |r|
-          # end
+          statement = db.prepare("select distinct beacon_id LINEID from Targets where created_at > ? and not user_id = ?")
+          row = statement.execute(hour_ago, line_id).to_a
+          row.each do |r|
+            message = {
+              type: 'image',
+              originalUrl: "https://6e5600f6.ngrok.io/static/#{image_name}",
+              previewUrl: "https://6e5600f6.ngrok.io/static/#{image_name}"
+            }
+
+            client.push_message(r['user_id'], message)
+          end
 
           statement.close
 
