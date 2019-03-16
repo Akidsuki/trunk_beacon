@@ -57,18 +57,18 @@ class App < Sinatra::Base
 
           create_tero(line_id, image_name)
 
-          hour_ago = 1.hour.ago
+          hour_ago = 10.hours.ago
 
-          statement = db.prepare("select distinct beacon_id LINEID from Targets where created_at > ? and not user_id = ?")
+          statement = db.prepare("select distinct beacon_id, LINEID from Targets where created_at > ? and not LINEID = ?")
           row = statement.execute(hour_ago, line_id).to_a
           row.each do |r|
             message = {
               type: 'image',
-              originalUrl: "https://6e5600f6.ngrok.io/static/#{image_name}",
-              previewUrl: "https://6e5600f6.ngrok.io/static/#{image_name}"
+              originalContentUrl: "https://0b7b0a03.ngrok.io/static/#{image_name}",
+              previewImageUrl: "https://0b7b0a03.ngrok.io/static/#{image_name}"
             }
 
-            client.push_message(r['user_id'], message)
+            client.push_message(r['LINEID'], message)
           end
 
           statement.close
