@@ -36,6 +36,13 @@ class App < Sinatra::Base
     events = client.parse_events_from(body)
     events.each { |event|
       case event
+      when Line::Bot::Event::Beacon
+        hwid = event['beacon']['hwid']
+        LINEID = event['source']['userId']
+
+        statement = db.prepare('INSERT INTO Targets (beacon_id, LINEID, created_at) VALUES(?, ?, NOW())')
+        statement.execute(hwid, LINEID)
+        statement.close
       when Line::Bot::Event::Follow
         follow_event(event)
       when Line::Bot::Event::Message
