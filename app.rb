@@ -150,8 +150,12 @@ class App < Sinatra::Base
   end
 
   def create_tero(line_id, image_name)
+    statement = db.prepare('SELECT id FROM Users WHERE LINEID = ?')
+    rr = statement.execute(line_id).first
+    user_id = rr['id']
+
     statement = db.prepare('INSERT INTO Teros (user_id, img_name, created_at) VALUES(?, ? ,NOW())')
-    statement.execute(line_id, image_name)
+    statement.execute(user_id, image_name)
     statement.close
   end
 
