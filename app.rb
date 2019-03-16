@@ -4,7 +4,7 @@ require 'line/bot'
 require 'json'
 require 'pry'
 require 'active_support/all'
-
+require "net/http"
 
 class App < Sinatra::Base
   def client
@@ -45,6 +45,8 @@ class App < Sinatra::Base
         statement.close
       when Line::Bot::Event::Follow
         follow_event(event)
+      when Line::Bot::Event::Postback
+        post_back_event(event)
       when Line::Bot::Event::Message
         case event.type
         when Line::Bot::Event::MessageType::Image
@@ -57,11 +59,12 @@ class App < Sinatra::Base
           statement = db.prepare("select beacon_id from Targets where LINEID = ? order by created_at desc")
           row = statement.execute(line_id).first
           return if row.nil?
-          p row
           beacon_id = row['beacon_id']
-          p beacon_id
 
           create_tero(line_id, image_name)
+          row = db.query('SELECT LAST_INSERT_ID() AS last_insert_id').first
+          statement.close
+          last_insert_id = row['last_insert_id']
           # タイムゾーンの関係で１０時間戻す
           # 本当は一時間で良い
           hour_ago = 10.hours.ago
@@ -69,15 +72,13 @@ class App < Sinatra::Base
           statement = db.prepare("select distinct beacon_id, LINEID from Targets where created_at > ? and beacon_id = ?")
           # statement = db.prepare("select distinct beacon_id, LINEID from Targets where created_at > ? and not LINEID = ? and beacon_id = ?")
           row = statement.execute(hour_ago, beacon_id).to_a
-          # row = statement.execute(hour_ago, line_id, beacon_id).to_a
           return if row.nil?
           row.each do |r|
-            p r
-            # message = {
-            #   type: 'image',
-            #   originalContentUrl: "https://0b7b0a03.ngrok.io/static/#{image_name}",
-            #   previewImageUrl: "https://0b7b0a03.ngrok.io/static/#{image_name}"
-            # }
+            statement = db.prepare('SELECT id FROM Users WHERE LINEID = ?')
+            rr = statement.execute(r['LINEID']).first
+            binding.pry
+            user_id = rr['id']
+
             message = {
               type: 'template',
               altText: 'Buttons alt text',
@@ -87,7 +88,8 @@ class App < Sinatra::Base
                 title: '飯テロ',
                 text: 'Hello, fu◯k you gay',
                 actions: [
-                  { label: 'もっとよこせ！', type: 'postback', data: "#{}" },
+                  { label: 'もっとよこせ！', type: 'postback', data: "tero_id=#{last_insert_id}&user_id=#{user_id}&type=#{1}" },
+                  { label: '送ってくんな', type: 'postback', data: "tero_id=#{last_insert_id}&user_id=#{user_id}&type=#{0}" },
                 ]
               }
             }
@@ -120,6 +122,17 @@ class App < Sinatra::Base
     }
 
     client.push_message(line_id, message)
+  end
+
+  def post_back_event(event)
+    binding.pry
+    res = Net::HTTP.start("https://trunk-hackathon.herokuapp.com") do |http|
+      http.get "/insert_feedback.php?#{event['postback']['data']}"
+    end
+
+    p res.header
+    p res.body
+
   end
 
   def create_user(line_id)
