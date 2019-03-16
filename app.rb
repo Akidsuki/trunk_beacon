@@ -63,7 +63,6 @@ class App < Sinatra::Base
           # end
 
           statement.close
-          binding.pry
 
           message = {
             type: "text",
