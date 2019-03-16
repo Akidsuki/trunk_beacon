@@ -6,7 +6,7 @@ require 'pry'
 require 'active_support/all'
 require "net/http"
 
-$BASE_URL = 'https://0b7b0a03.ngrok.io'
+$BASE_URL = 'https://f25c46ee.ngrok.io/'
 
 class App < Sinatra::Base
   def client
