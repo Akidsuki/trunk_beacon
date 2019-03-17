@@ -30,6 +30,11 @@ class App < Sinatra::Base
   get '/profile/:user_id' do
     statement = db.prepare('SELECT LINEID FROM Users WHERE id = ?')
     rr = statement.execute(params[:user_id]).first
+    if rr.nil?
+      status 404
+      return 'Not found'
+    end
+
     line_id = rr['LINEID']
 
     response = client.get_profile(line_id)
