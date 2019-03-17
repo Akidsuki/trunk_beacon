@@ -50,7 +50,6 @@ class App < Sinatra::Base
   end
 
   get '/profile/:user_id' do
-    statement = db.prepare('SELECT LINEID FROM Users WHERE id = ?')
     line_id = user_id_to_line_id(params[:user_id])
     if line_id.nil?
       status 404
