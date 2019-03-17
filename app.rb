@@ -194,7 +194,7 @@ class App < Sinatra::Base
       line_id = rr['LINEID']
       type = event['postback']['data'].split('=')[3]
       p type
-      text = type == 0 ? "本当の飯テロを教えてやれ！\nお前もテロするんやで！" : "うまそうな飯やな！\nお前もテロするんやで！"
+      text = type == '0' ? "本当の飯テロを教えてやれ！\nお前もテロするんやで！" : "うまそうな飯やな！\nお前もテロするんやで！"
       message = {
         type: "text",
         text: text,
