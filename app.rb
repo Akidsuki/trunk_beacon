@@ -122,6 +122,8 @@ class App < Sinatra::Base
               template: {
                 type: 'buttons',
                 thumbnailImageUrl: "#{$BASE_URL}/static/#{image_name}",
+                title: '',
+                text: '',
                 actions: [
                   { label: 'もっとよこせ！', type: 'postback', data: "tero_id=#{last_insert_id}&user_id=#{user_id}&type=#{1}" },
                   { label: '送ってくんな', type: 'postback', data: "tero_id=#{last_insert_id}&user_id=#{user_id}&type=#{0}" },
