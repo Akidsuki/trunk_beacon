@@ -63,7 +63,7 @@ class App < Sinatra::Base
   end
 
   # @params user_ids user_ids=1,2,3,4で来る想定
-  get '/profiles/:user_ids' do
+  get '/profiles' do
     ids = params[:user_ids].split(',')
 
     contents = []
