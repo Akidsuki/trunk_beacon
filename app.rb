@@ -178,10 +178,14 @@ class App < Sinatra::Base
     uri = "https://trunk-hackathon.herokuapp.com/insert_feedback.php?#{event['postback']['data']}"
     res = Net::HTTP.get_response(URI.parse(uri))
 
-    if res.code == 200
+    if res.code == '200'
+      p 'hgoehogehgoe'
+      p  event['postback']['data'].split('=')
       user_id = event['postback']['data'].split('=')[3]
+      p user_id
       statement = db.prepare('SELECT LINEID FROM Users WHERE id = ?')
       rr = statement.execute(user_id).first
+      statement.close
       if rr.nil?
         status 404
         return 'Not found'
@@ -189,6 +193,7 @@ class App < Sinatra::Base
 
       line_id = rr['LINEID']
       type = event['postback']['data'].split('=')[5]
+      p type
       text = type == 0 ? "本当の飯テロを教えてやれ！\nお前もテロするんやで！" : "うまそうな飯やな！\nお前もテロするんやで！"
       message = {
         type: "text",
