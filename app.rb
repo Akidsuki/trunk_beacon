@@ -34,6 +34,20 @@ class App < Sinatra::Base
     image
   end
 
+  get '/profile' do
+    statement = db.prepare('SELECT LINEID FROM Users')
+    rr = statement.execute().to_a
+    prof = Hash.new
+    rr.each do |r|
+      line_id = r['LINEID']
+      response = client.get_profile(line_id)
+      content = JSON.parse(response.body)
+      prof.store(line_id, content['displayName'])
+    end
+
+    prof.to_json
+  end
+
   get '/profile/:user_id' do
     statement = db.prepare('SELECT LINEID FROM Users WHERE id = ?')
     rr = statement.execute(params[:user_id]).first
