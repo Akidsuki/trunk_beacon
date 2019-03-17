@@ -181,7 +181,7 @@ class App < Sinatra::Base
     if res.code == '200'
       p 'hgoehogehgoe'
       p  event['postback']['data'].split('=')
-      user_id = event['postback']['data'].split('=')[3]
+      user_id = event['postback']['data'].split('=')[2].split('&').first
       p user_id
       statement = db.prepare('SELECT LINEID FROM Users WHERE id = ?')
       rr = statement.execute(user_id).first
@@ -192,7 +192,7 @@ class App < Sinatra::Base
       end
 
       line_id = rr['LINEID']
-      type = event['postback']['data'].split('=')[5]
+      type = event['postback']['data'].split('=')[3]
       p type
       text = type == 0 ? "本当の飯テロを教えてやれ！\nお前もテロするんやで！" : "うまそうな飯やな！\nお前もテロするんやで！"
       message = {
