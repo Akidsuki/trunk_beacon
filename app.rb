@@ -69,7 +69,10 @@ class App < Sinatra::Base
     contents = []
     ids.each do |user_id|
       line_id = user_id_to_line_id(user_id)
-      next if line_id.nil?
+      if line_id.nil?
+        contents << nil
+        next
+      end
 
       response = client.get_profile(line_id)
       content = JSON.parse(response.body)
