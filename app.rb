@@ -13,9 +13,11 @@ class App < Sinatra::Base
   configure do
     enable :cross_origin
   end
+
   before do
     response.headers['Access-Control-Allow-Origin'] = '*'
   end
+
   def client
     @client ||= Line::Bot::Client.new { |config|
       # TODO 環境変数化する
