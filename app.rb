@@ -51,13 +51,11 @@ class App < Sinatra::Base
 
   get '/profile/:user_id' do
     statement = db.prepare('SELECT LINEID FROM Users WHERE id = ?')
-    rr = statement.execute(params[:user_id]).first
-    if rr.nil?
+    line_id = user_id_to_line_id(params[:user_id])
+    if line_id.nil?
       status 404
       return 'Not found'
     end
-
-    line_id = rr['LINEID']
 
     response = client.get_profile(line_id)
     content = JSON.parse(response.body)
@@ -115,10 +113,8 @@ class App < Sinatra::Base
             display_name = content['displayName']
 
           row.each do |r|
-            statement = db.prepare('SELECT id FROM Users WHERE LINEID = ?')
-            rr = statement.execute(r['LINEID']).first
-            break if rr.nil?
-            user_id = rr['id']
+            user_id = line_id_to_user_id(r['LINEID'])
+            break if user_id.nil?
 
             message = {
               type: 'template',
@@ -179,15 +175,12 @@ class App < Sinatra::Base
 
     if res.code == '200'
       user_id = event['postback']['data'].split('=')[2].split('&').first
-      statement = db.prepare('SELECT LINEID FROM Users WHERE id = ?')
-      rr = statement.execute(user_id).first
-      statement.close
-      if rr.nil?
+      line_id = user_id_to_line_id(user_id)
+      if line_id.nil?
         status 404
         return 'Not found'
       end
 
-      line_id = rr['LINEID']
       type = event['postback']['data'].split('=')[3]
       text = type == '0' ? "本当の飯テロを教えてやれ！\nお前もテロするんやで！" : "うまそうな飯やな！\n負けじとお前もテロするんやで！"
       message = {
@@ -206,13 +199,29 @@ class App < Sinatra::Base
   end
 
   def create_tero(line_id, image_name)
-    statement = db.prepare('SELECT id FROM Users WHERE LINEID = ?')
-    rr = statement.execute(line_id).first
-    user_id = rr['id']
+    user_id = line_id_to_user_id(line_id)
 
     statement = db.prepare('INSERT INTO Teros (user_id, img_name, created_at) VALUES(?, ? ,NOW())')
     statement.execute(user_id, image_name)
     statement.close
+  end
+
+  def user_id_to_line_id(user_id)
+    statement = db.prepare('SELECT LINEID FROM Users WHERE id = ?')
+    r = statement.execute(user_id).first
+    statement.close
+    return nil if r.nil?
+
+    r['LINEID']
+  end
+
+  def line_id_to_user_id(line_id)
+    statement = db.prepare('SELECT id FROM Users WHERE LINEID = ?')
+    r = statement.execute(line_id).first
+
+    return nil if r.nil?
+
+    r['id']
   end
 
   def db
