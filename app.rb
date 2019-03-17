@@ -92,6 +92,7 @@ class App < Sinatra::Base
           row.each do |r|
             statement = db.prepare('SELECT id FROM Users WHERE LINEID = ?')
             rr = statement.execute(r['LINEID']).first
+            break if rr.nil?
             user_id = rr['id']
 
             message = {
