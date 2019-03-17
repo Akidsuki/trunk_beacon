@@ -102,10 +102,8 @@ class App < Sinatra::Base
           # 本当は一時間で良い
           hour_ago = 10.hours.ago
 
-          # TODO 検証が済んだら戻す
-          statement = db.prepare("select distinct beacon_id, LINEID from Targets where created_at > ? and beacon_id = ?")
-          # statement = db.prepare("select distinct beacon_id, LINEID from Targets where created_at > ? and not LINEID = ? and beacon_id = ?")
-          row = statement.execute(hour_ago, beacon_id).to_a
+          statement = db.prepare("select distinct beacon_id, LINEID from Targets where created_at > ? and not LINEID = ? and beacon_id = ?")
+          row = statement.execute(hour_ago, line_id, beacon_id).to_a
           return if row.nil?
 
             response = client.get_profile(line_id)
