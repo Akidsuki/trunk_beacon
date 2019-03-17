@@ -7,7 +7,7 @@ require 'pry'
 require 'active_support/all'
 require "net/http"
 
-$BASE_URL = 'https://f25c46ee.ngrok.io/'
+$BASE_URL = 'https://trunk-beacon.herokuapp.com/'
 
 class App < Sinatra::Base
   configure do
