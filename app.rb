@@ -77,7 +77,7 @@ class App < Sinatra::Base
       contents << content['displayName']
     end
 
-    contents
+    contents.to_json
   end
 
 
