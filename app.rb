@@ -110,6 +110,11 @@ class App < Sinatra::Base
           # statement = db.prepare("select distinct beacon_id, LINEID from Targets where created_at > ? and not LINEID = ? and beacon_id = ?")
           row = statement.execute(hour_ago, beacon_id).to_a
           return if row.nil?
+
+            response = client.get_profile(line_id)
+            content = JSON.parse(response.body)
+            display_name = content['displayName']
+
           row.each do |r|
             statement = db.prepare('SELECT id FROM Users WHERE LINEID = ?')
             rr = statement.execute(r['LINEID']).first
@@ -122,8 +127,7 @@ class App < Sinatra::Base
               template: {
                 type: 'buttons',
                 thumbnailImageUrl: "#{$BASE_URL}/static/#{image_name}",
-                title: '',
-                text: '',
+                text: "#{display_name}からのテロ攻撃です",
                 actions: [
                   { label: 'もっとよこせ！', type: 'postback', data: "tero_id=#{last_insert_id}&user_id=#{user_id}&type=#{1}" },
                   { label: '送ってくんな', type: 'postback', data: "tero_id=#{last_insert_id}&user_id=#{user_id}&type=#{0}" },
