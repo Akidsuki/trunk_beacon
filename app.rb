@@ -76,12 +76,7 @@ class App < Sinatra::Base
     events.each { |event|
       case event
       when Line::Bot::Event::Beacon
-        hwid = event['beacon']['hwid']
-        LINEID = event['source']['userId']
-
-        statement = db.prepare('INSERT INTO Targets (beacon_id, LINEID, created_at) VALUES(?, ?, NOW())')
-        statement.execute(hwid, LINEID)
-        statement.close
+        beacon_event(event)
       when Line::Bot::Event::Follow
         follow_event(event)
       when Line::Bot::Event::Postback
@@ -116,6 +111,7 @@ class App < Sinatra::Base
           row.each do |r|
             statement = db.prepare('SELECT id FROM Users WHERE LINEID = ?')
             rr = statement.execute(r['LINEID']).first
+            break if rr.nil?
             user_id = rr['id']
 
             message = {
@@ -161,6 +157,15 @@ class App < Sinatra::Base
     }
 
     client.push_message(line_id, message)
+  end
+
+  def beacon_event(event)
+    hwid = event['beacon']['hwid']
+    line_id = event['source']['userId']
+
+    statement = db.prepare('INSERT INTO Targets (beacon_id, LINEID, created_at) VALUES(?, ?, NOW())')
+    statement.execute(hwid, line_id)
+    statement.close
   end
 
   def post_back_event(event)
