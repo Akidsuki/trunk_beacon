@@ -62,6 +62,25 @@ class App < Sinatra::Base
     content['displayName']
   end
 
+  # @params user_ids user_ids=1,2,3,4で来る想定
+  get '/profiles/:user_ids' do
+    ids = params[:user_ids].split(',')
+
+    contents = []
+    ids.each do |user_id|
+      line_id = user_id_to_line_id(user_id)
+      next if line_id.nil?
+
+      response = client.get_profile(line_id)
+      content = JSON.parse(response.body)
+
+      contents << content['displayName']
+    end
+
+    contents
+  end
+
+
   post '/callback' do
     body = request.body.read
 
@@ -111,7 +130,7 @@ class App < Sinatra::Base
 
           row.each do |r|
             user_id = line_id_to_user_id(r['LINEID'])
-            break if user_id.nil?
+            next if user_id.nil?
 
             message = {
               type: 'template',
