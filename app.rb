@@ -144,7 +144,7 @@ class App < Sinatra::Base
                 text: "#{display_name}からのテロ攻撃です",
                 actions: [
                   { label: 'もっとよこせ！', type: 'postback', data: "tero_id=#{last_insert_id}&user_id=#{user_id}&type=#{1}" },
-                  { label: '送ってくんな', type: 'postback', data: "tero_id=#{last_insert_id}&user_id=#{user_id}&type=#{0}" },
+                  { label: '送ってくんな!', type: 'postback', data: "tero_id=#{last_insert_id}&user_id=#{user_id}&type=#{0}" },
                 ]
               }
             }
